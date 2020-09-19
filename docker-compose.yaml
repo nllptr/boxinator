@@ -7,4 +7,18 @@ services:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=boxinator
     ports:
-      - 3306:3306
+      - "3306:3306"
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker/backend.Dockerfile
+    image: backend:dev
+    ports:
+      - "8080:8080"
+    # The backend will fail to start until the database service is ready to accept connections.
+    # That is why we choose to always restart it. Eventually it will stabilize.
+    restart: always
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=secret
+      - MYSQL_HOST=db

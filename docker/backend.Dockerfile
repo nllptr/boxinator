@@ -1,7 +1,19 @@
-FROM openjdk:11.0.8
-RUN apt-get update && apt-get install -y maven
-COPY ./backend /project/
-RUN  cd /project && mvn package
+FROM openjdk:11.0.8 as build
 
-#run the spring boot application
-ENTRYPOINT ["java", "/project/target/boxinator-0.0.1-SNAPSHOT.jar"]
+WORKDIR /workspace/app
+
+COPY backend/mvnw .
+COPY backend/.mvn .mvn
+COPY backend/pom.xml .
+COPY backend/src src
+
+RUN ./mvnw install -DskipTests
+RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+
+FROM openjdk:11.0.8
+VOLUME /tmp
+ARG DEPENDENCY=/workspace/app/target/dependency
+COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
+COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
+ENTRYPOINT ["java","-cp","app:app/lib/*","com.simonwessel.boxinator.BoxinatorApplication"]
