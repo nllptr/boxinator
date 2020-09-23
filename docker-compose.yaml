@@ -6,15 +6,17 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=boxinator
-    ports:
-      - "3306:3306"
+    # ports:
+    #   - "3306:3306"
+    expose:
+      - "3306"
   backend:
     build:
       context: .
       dockerfile: ./docker/backend.Dockerfile
     image: backend:dev
     ports:
-      - "8080:8080"
+      - "8081:8080"
     # The backend will fail to start until the database service is ready to accept connections.
     # That is why we choose to always restart it. Eventually it will stabilize.
     restart: always
@@ -22,3 +24,15 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=secret
       - MYSQL_HOST=db
+      - FRONTEND_HOST=http://localhost:8080
+  frontend:
+    build:
+      context: .
+      dockerfile: ./docker/frontend.Dockerfile
+    image: frontend:dev
+    ports:
+      - "8080:8080"
+    stdin_open: true
+    environment:
+      - REACT_APP_BACKEND_HOST=localhost
+      - REACT_APP_BACKEND_PORT=8081

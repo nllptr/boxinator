@@ -1,0 +1,20 @@
+div {
+    margin: auto;
+}
+
+table {
+    border-collapse: collapse;
+    margin: auto;
+}
+
+table, th, td {
+    border: 2px solid black;
+}
+
+th, td {
+    white-space: nowrap;
+    padding: 5px;
+    font-weight: normal;
+    text-align: left;
+    min-width: 150px;
+}
